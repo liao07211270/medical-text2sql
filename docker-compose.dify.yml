@@ -1,0 +1,14 @@
+# 疊加檔：讓 flask-api 加入自架 Dify 的 Docker network，
+# 使 Dify 工作流中的 http://flask-api:5000/execute_sql 可以直接解析。
+# 前提：Dify 已先用官方 docker compose 啟動（network 才會存在）。
+# network 名稱用 `docker network ls` 確認，預設為 docker_default，可在 .env 以 DIFY_NETWORK 覆寫。
+services:
+  flask-api:
+    networks:
+      - default
+      - dify
+
+networks:
+  dify:
+    external: true
+    name: ${DIFY_NETWORK:-docker_default}

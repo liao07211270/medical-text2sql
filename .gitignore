@@ -1,0 +1,9 @@
+.env
+__pycache__/
+.pytest_cache/
+.venv/
+*.pyc
+dify-docker/
+
+# 個人工作紀錄，不公開
+HANDOFF.md

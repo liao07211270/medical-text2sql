@@ -1,0 +1,368 @@
+app:
+  description: ''
+  icon: 🤖
+  icon_background: '#FFEAD5'
+  icon_type: emoji
+  mode: workflow
+  name: Text-to-SQL for Medical Databases
+  use_icon_as_answer_icon: false
+dependencies:
+- current_identifier: null
+  type: marketplace
+  value:
+    marketplace_plugin_unique_identifier: langgenius/gemini:0.7.22@e9e5725768b1d79274bf5dee2052f4d99d736f104cc98dad57392c5b70412502
+    version: null
+kind: app
+version: 0.6.0
+workflow:
+  conversation_variables: []
+  environment_variables: []
+  features:
+    file_upload:
+      allowed_file_extensions:
+      - .JPG
+      - .JPEG
+      - .PNG
+      - .GIF
+      - .WEBP
+      - .SVG
+      allowed_file_types:
+      - image
+      allowed_file_upload_methods:
+      - local_file
+      - remote_url
+      enabled: false
+      fileUploadConfig:
+        attachment_image_file_size_limit: 2
+        audio_file_size_limit: 50
+        batch_count_limit: 5
+        file_size_limit: 15
+        file_upload_limit: 20
+        image_file_batch_limit: 10
+        image_file_size_limit: 10
+        single_chunk_attachment_limit: 10
+        video_file_size_limit: 100
+        workflow_file_upload_limit: 10
+      image:
+        enabled: false
+        number_limits: 3
+        transfer_methods:
+        - local_file
+        - remote_url
+      number_limits: 3
+    opening_statement: ''
+    retriever_resource:
+      enabled: true
+    sensitive_word_avoidance:
+      enabled: false
+    speech_to_text:
+      enabled: false
+    suggested_questions: []
+    suggested_questions_after_answer:
+      enabled: false
+    text_to_speech:
+      enabled: false
+      language: ''
+      voice: ''
+  graph:
+    edges:
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: start
+        targetType: llm
+      id: 1775803148990-source-1778077877118-target
+      source: '1775803148990'
+      sourceHandle: source
+      target: '1778077877118'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: llm
+        targetType: code
+      id: 1778077877118-source-1778137756024-target
+      source: '1778077877118'
+      sourceHandle: source
+      target: '1778137756024'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: code
+        targetType: http-request
+      id: 1778137756024-source-1778826473300-target
+      source: '1778137756024'
+      sourceHandle: source
+      target: '1778826473300'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: http-request
+        targetType: end
+      id: 1778826473300-source-1778137849513-target
+      source: '1778826473300'
+      sourceHandle: source
+      target: '1778137849513'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    nodes:
+    - data:
+        selected: false
+        title: 開始
+        type: start
+        variables:
+        - default: ''
+          hint: ''
+          label: user_query
+          max_length: 256
+          options: []
+          placeholder: ''
+          required: true
+          type: text-input
+          variable: user_query
+      height: 108
+      id: '1775803148990'
+      position:
+        x: 182.44646040266196
+        y: 179
+      positionAbsolute:
+        x: 182.44646040266196
+        y: 179
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        context:
+          enabled: false
+          variable_selector: []
+        model:
+          completion_params:
+            temperature: 0
+          mode: chat
+          name: gemini-3-flash-preview
+          provider: langgenius/gemini/google
+        prompt_template:
+        - id: d9d86890-cf06-485c-9255-f86c7ec285f2
+          role: system
+          text: "你是一個專業的醫療資料庫 SQL 轉譯工程師。\n請根據以下提供的資料庫結構 (Schema)，將使用者的自然語言提問轉換成精準的\
+            \ SQL 查詢語句。\n\n【資料庫結構】\n-- 1. 病患基本資料表 (Patients)\nCREATE TABLE Patients\
+            \ (\n    PatientID VARCHAR(20) PRIMARY KEY COMMENT '病患身分證字號',\n    Gender\
+            \ VARCHAR(10) COMMENT '性別',\n    BirthDate DATE COMMENT '出生日期',\n    BloodType\
+            \ VARCHAR(5) COMMENT '血型',\n    RoomNumber VARCHAR(10) COMMENT '病房號碼',\n\
+            \    Height DECIMAL(5,2) COMMENT '身高(cm)',\n    Weight DECIMAL(5,2) COMMENT\
+            \ '體重(kg)',\n    Phone VARCHAR(15) COMMENT '手機號碼'\n);\n\n-- 2. 臨床看診紀錄表\
+            \ (ClinicalRecords)\nCREATE TABLE ClinicalRecords (\n    RecordID INT\
+            \ AUTO_INCREMENT PRIMARY KEY COMMENT '看診紀錄流水號',\n    PatientID VARCHAR(20)\
+            \ COMMENT '病患身分證字號',\n    VisitDate DATETIME COMMENT '就醫日期時間',\n    ChiefComplaint\
+            \ TEXT COMMENT '主訴症狀/病患自述',\n    SystolicBP INT COMMENT '收縮壓',\n    DiastolicBP\
+            \ INT COMMENT '舒張壓',\n    Pulse INT COMMENT '脈搏',\n    FOREIGN KEY (PatientID)\
+            \ REFERENCES Patients(PatientID)\n);\n\n-- 3. 藥品字典表 (Medications)\nCREATE\
+            \ TABLE Medications (\n    MedicationID VARCHAR(20) PRIMARY KEY COMMENT\
+            \ '藥品代碼',\n    MedName VARCHAR(100) NOT NULL COMMENT '藥品名稱',\n    Unit\
+            \ VARCHAR(20) COMMENT '單位',\n    Stock INT COMMENT '庫存量'\n);\n\n-- 4.\
+            \ 處方明細表 (Prescriptions)\nCREATE TABLE Prescriptions (\n    PrescriptionID\
+            \ INT AUTO_INCREMENT PRIMARY KEY COMMENT '處方流水號',\n    RecordID INT COMMENT\
+            \ '對應的看診紀錄流水號',\n    MedicationID VARCHAR(20) COMMENT '藥品代碼',\n    Dosage\
+            \ VARCHAR(50) COMMENT '用量',\n    Frequency VARCHAR(50) COMMENT '頻率',\n\
+            \    Days INT COMMENT '開立天數',\n    FOREIGN KEY (RecordID) REFERENCES ClinicalRecords(RecordID),\n\
+            \    FOREIGN KEY (MedicationID) REFERENCES Medications(MedicationID)\n\
+            );\n\n【任務限制】\n1. 只能輸出純 SQL 語法，絕對不要包含任何 markdown 標記（如 ```sql）或任何解釋性文字。\n\
+            2. 絕對不可以生成 DROP、DELETE、UPDATE、INSERT、TRUNCATE、ALTER、EXEC、GRANT、REVOKE\
+            \ 等修改或控制資料庫的指令，僅限使用 SELECT。\n3. 3. 如果使用者的提問與上述四張資料表完全無關（例如詢問股市、天氣、新聞、手術紀錄等），請直接輸出\
+            \ UNRELATED。但若問題提及「藥名、疾病、症狀、功效描述」，屬於資料表可查詢範圍，絕不可輸出 UNRELATED，必須使用 LIKE\
+            \ 進行查詢。\n4. 如果問題部分相關但超出目前資料表範圍（例如詢問手術紀錄），請輸出 UNRELATED，而非編造 SQL。\n5. 進行跨表查詢時，請務必使用標準的\
+            \ JOIN 語法（INNER JOIN 或 LEFT JOIN），並使用簡短的資料表別名（p, c, m, rx）以提高可讀性。\n6.\
+            \ 當使用者詢問特定「藥品名稱」、「藥物種類」或「功效描述」（例如：Amlodipine、普拿疼、降血壓藥、消炎藥）時，請一律對 Medications\
+            \ 表的 MedName 欄位使用 LIKE 進行模糊查詢（例如：m.MedName LIKE '%Amlodipine%'）。\n\n【學習範例】\n\
+            提問：幫我找出所有血型是 O 型的男性病患。\nSQL：SELECT * FROM Patients WHERE BloodType = 'O'\
+            \ AND Gender = '男';\n\n提問：幫我查病患 A123456789 的所有看診紀錄，我要看日期和他們的主訴症狀。\nSQL：SELECT\
+            \ VisitDate, ChiefComplaint FROM ClinicalRecords WHERE PatientID = 'A123456789';\n\
+            \n提問：有些病患來看診有被開藥，幫我列出所有病患的身分證字號、主訴症狀以及被開立的藥品名稱。\nSQL：SELECT p.PatientID,\
+            \ c.ChiefComplaint, m.MedName FROM Prescriptions rx JOIN ClinicalRecords\
+            \ c ON rx.RecordID = c.RecordID JOIN Patients p ON c.PatientID = p.PatientID\
+            \ JOIN Medications m ON rx.MedicationID = m.MedicationID;\n\n提問：幫我看看住在\
+            \ A302 病房的病患，最近一次看診的血壓是多少？\nSQL：SELECT p.PatientID, p.RoomNumber, c.VisitDate,\
+            \ c.SystolicBP, c.DiastolicBP FROM Patients p JOIN ClinicalRecords c ON\
+            \ p.PatientID = c.PatientID WHERE p.RoomNumber = 'A302' ORDER BY c.VisitDate\
+            \ DESC LIMIT 1;\n\n提問：幫我找有服用降血壓藥的病患\nSQL：SELECT DISTINCT p.* FROM Patients\
+            \ p JOIN ClinicalRecords c ON p.PatientID = c.PatientID JOIN Prescriptions\
+            \ rx ON c.RecordID = rx.RecordID JOIN Medications m ON rx.MedicationID\
+            \ = m.MedicationID WHERE m.MedName LIKE '%降血壓%' OR m.MedName LIKE '%血壓%';\n\
+            \n提問：幫我找有服用Amlodipine的病患有哪些？\nSQL：SELECT DISTINCT p.* FROM Patients p\
+            \ JOIN ClinicalRecords c ON p.PatientID = c.PatientID JOIN Prescriptions\
+            \ rx ON c.RecordID = rx.RecordID JOIN Medications m ON rx.MedicationID\
+            \ = m.MedicationID WHERE m.MedName LIKE '%Amlodipine%';\n\n提問：幫我找服用 MED-002\
+            \ 的患者\nSQL：SELECT DISTINCT p.* FROM Patients p JOIN ClinicalRecords c\
+            \ ON p.PatientID = c.PatientID JOIN Prescriptions rx ON c.RecordID = rx.RecordID\
+            \ WHERE rx.MedicationID = 'MED-002';\n\n提問：幫我找服用 Amlodipine 的患者（或是輸入其他中文藥名、功效如：降血壓藥、止痛藥）\n\
+            SQL：SELECT DISTINCT p.* FROM Patients p JOIN ClinicalRecords c ON p.PatientID\
+            \ = c.PatientID JOIN Prescriptions rx ON c.RecordID = rx.RecordID JOIN\
+            \ Medications m ON rx.MedicationID = m.MedicationID WHERE m.MedName LIKE\
+            \ '%Amlodipine%' OR m.MedName LIKE '%降血壓%';\n\n提問：查詢今天台股資訊。\nSQL：UNRELATED\n\
+            \n提問：最近有發生什麼大新聞嗎？\nSQL：UNRELATED\n\n【重要提醒】\n再次強調：若問題與以上四張資料表無關，你的完整輸出必須只有\
+            \ UNRELATED 這七個字母，不得有任何其他內容。\n\n【使用者提問】\n{{user_query}}"
+        - id: 9c25f871-3713-4bc6-8888-0d223478afdb
+          role: user
+          text: '{{#1775803148990.user_query#}}'
+        selected: false
+        title: LLM
+        type: llm
+        vision:
+          enabled: false
+      height: 87
+      id: '1778077877118'
+      position:
+        x: 535.4548897436093
+        y: 200
+      positionAbsolute:
+        x: 535.4548897436093
+        y: 200
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 241
+    - data:
+        code: "import re\n\ndef main(sql_input: str) -> dict:\n    \n    # 若 LLM 回傳空值或非字串，直接攔截\n\
+          \    if not sql_input or not isinstance(sql_input, str):\n        return\
+          \ {\n            \"status\": \"danger\",\n            \"safe_sql\": \"\"\
+          ,\n            \"message\": \"⚠️ 無法產生對應的查詢語句，請換個方式描述您的問題。\"\n        }\n\
+          \    \n    sql_stripped = sql_input.strip()\n    sql_upper = sql_stripped.upper()\n\
+          \    \n    # 若回傳內容不像 SQL（不含 SELECT、FROM），視為無關問題\n    if 'SELECT' not in\
+          \ sql_upper or 'FROM' not in sql_upper:\n        return {\n            \"\
+          status\": \"danger\",\n            \"safe_sql\": \"\",\n            \"message\"\
+          : \"⚠️ 您的問題似乎與醫療資料庫無關，請輸入與病患、看診紀錄或處方相關的查詢。\"\n        }\n    \n    # 定義黑名單，使用正規表達式確保是獨立關鍵字（避免誤擋欄位名或資料表名）\n\
+          \    forbidden_words = ['DROP', 'DELETE', 'UPDATE', 'INSERT', 'ALTER', 'TRUNCATE',\
+          \ 'EXEC', 'EXECUTE', 'GRANT', 'REVOKE']\n    \n    for word in forbidden_words:\n\
+          \        pattern = r'\\b' + word + r'\\b'\n        if re.search(pattern,\
+          \ sql_upper):\n            return {\n                \"status\": \"danger\"\
+          ,\n                \"safe_sql\": \"\",\n                \"message\": f\"\
+          ⚠️ 資安系統攔截：偵測到禁用指令 '{word}'，本系統僅允許查詢操作。\"\n            }\n    \n    # 嚴格白名單：必須以\
+          \ SELECT 開頭\n    if not sql_upper.startswith('SELECT'):\n        return\
+          \ {\n            \"status\": \"danger\",\n            \"safe_sql\": \"\"\
+          ,\n            \"message\": \"⚠️ 資安系統攔截：本系統僅允許執行 SELECT 查詢指令。\"\n      \
+          \  }\n    \n    # 檢測通過\n    return {\n        \"status\": \"safe\",\n  \
+          \      \"safe_sql\": sql_stripped,\n        \"message\": \"✅ 資安檢測通過，允許執行查詢。\"\
+          \n    }"
+        code_language: python3
+        outputs:
+          message:
+            children: null
+            type: string
+          safe_sql:
+            children: null
+            type: string
+          status:
+            children: null
+            type: string
+        selected: false
+        title: 資安攔截
+        type: code
+        variables:
+        - value_selector:
+          - '1778077877118'
+          - text
+          value_type: string
+          variable: sql_input
+      height: 51
+      id: '1778137756024'
+      position:
+        x: 883.6246399126383
+        y: 200
+      positionAbsolute:
+        x: 883.6246399126383
+        y: 200
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 241
+    - data:
+        outputs:
+        - value_selector:
+          - '1778137756024'
+          - message
+          value_type: string
+          variable: message
+        - value_selector:
+          - '1778137756024'
+          - safe_sql
+          value_type: string
+          variable: safe_sql
+        - value_selector:
+          - '1778826473300'
+          - body
+          value_type: string
+          variable: db_result
+        selected: true
+        title: 輸出
+        type: end
+      height: 139
+      id: '1778137849513'
+      position:
+        x: 1572.3637563981697
+        y: 200
+      positionAbsolute:
+        x: 1572.3637563981697
+        y: 200
+      selected: true
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 241
+    - data:
+        authorization:
+          config: null
+          type: no-auth
+        body:
+          data:
+          - id: key-value-35
+            key: ''
+            type: text
+            value: "{\n  \"sql\": \"{{#1778137756024.safe_sql#}}\"\n}"
+          type: json
+        headers: Content-Type:application/json
+        method: post
+        params: ''
+        retry_config:
+          max_retries: 3
+          retry_enabled: true
+          retry_interval: 100
+        selected: false
+        ssl_verify: true
+        timeout:
+          max_connect_timeout: 0
+          max_read_timeout: 0
+          max_write_timeout: 0
+        title: HTTP 請求
+        type: http-request
+        url: http://flask-api:5000/execute_sql
+        variables: []
+      height: 136
+      id: '1778826473300'
+      position:
+        x: 1247.6037425607258
+        y: 200
+      positionAbsolute:
+        x: 1247.6037425607258
+        y: 200
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 241
+    viewport:
+      x: -91.87795064048464
+      y: 33.879865377392036
+      zoom: 0.7836897339025457
+  rag_pipeline_variables: []
