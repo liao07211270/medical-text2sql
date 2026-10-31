@@ -39,6 +39,7 @@
 | `scripts/eval_report.py` | 離線評估，輸出 `docs/eval_results.md` |
 | `scripts/smoke_docker.py` | 對 Docker 版 API（真實 MySQL）跑全部案例＋查詢逾時測試 |
 | `scripts/eval_dify.py` | 線上評估（實際呼叫 Dify 工作流 + LLM），輸出 `docs/eval_dify_results.md` |
+| `web/medical_query.html` | 查詢介面（單一 HTML，直接呼叫 Dify 工作流 API） |
 
 ## API 規格
 
@@ -124,6 +125,15 @@ python -m venv .venv
    - **HTTP 請求**：`POST http://flask-api:5000/execute_sql`，Header `Content-Type: application/json`，Body JSON `{"sql": "{{資安攔截.safe_sql}}"}`，重試 3 次、間隔 100ms
    - **結束**：`message`、`safe_sql`、`db_result`（HTTP 節點 `body`）
 5. 測試：在工作流「執行」輸入「幫我找有服用Amlodipine的病患有哪些？」。
+
+### 查詢介面
+
+工作流發布後，用瀏覽器直接開啟 `web/medical_query.html`（不需要另外架伺服器）：
+
+1. 展開「連線設定」，API 位址預設 `http://localhost/v1/workflows/run`；貼上 Dify 應用的 API 金鑰（`app-` 開頭）後按「儲存」。
+   金鑰只存在該瀏覽器的 localStorage，不會寫進檔案。
+2. 輸入問題或點範例問題，畫面會顯示產生的 SQL、查詢結果表格（每頁 10 筆），
+   被資安節點攔截或被 API 拒絕時顯示對應訊息。
 
 ### 不自架 Dify（使用 Dify Cloud）
 
